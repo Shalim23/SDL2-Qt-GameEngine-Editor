@@ -1,12 +1,12 @@
 #pragma once
 
-class World;
-class SystemManager;
+class SystemInitContext;
+class SystemUpdateContext;
 
 class SystemBase
 {
 public:
-    virtual void init(SystemManager&, World&){}
-    virtual void update(World&){}
+    virtual void init(SystemInitContext&){}
+    virtual void update(SystemUpdateContext&){}
     virtual void shutdown(){}
 };

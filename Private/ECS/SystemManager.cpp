@@ -1,16 +1,25 @@
-#include "Engine/ECS/SystemManager.h"
+#include "SystemManager.h"
 
-void SystemManager::init(World& w)
+void SystemManager::init(SystemInitContext& context)
 {
-    impl_.init(*this, w);
+    for (auto& system : systems_)
+    {
+        system->init(context);
+    }
 }
 
-void SystemManager::update(World& w)
+void SystemManager::update(SystemUpdateContext& context)
 {
-    impl_.update(w);
+    for (auto& system : systems_)
+    {
+        system->update(context);
+    }
 }
 
 void SystemManager::shutdown()
 {
-    impl_.shutdown();
+    for (auto& system : systems_)
+    {
+        system->shutdown();
+    }
 }

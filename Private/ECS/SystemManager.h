@@ -7,21 +7,21 @@
 
 #include "Engine/ECS/Types/SystemBase.h"
 
-class World;
-class SystemManager;
+class SystemInitContext;
+class SystemUpdateContext;
 
-class SystemManagerImpl final
+class SystemManager final
 {
 public:
-    SystemManagerImpl() = default;
-    ~SystemManagerImpl() = default;
-    SystemManagerImpl(const SystemManagerImpl& other) = delete;
-    SystemManagerImpl(SystemManagerImpl&& other) = delete;
-    SystemManagerImpl& operator=(const SystemManagerImpl& other) = delete;
-    SystemManagerImpl& operator=(SystemManagerImpl&& other) = delete;
+    SystemManager() = default;
+    ~SystemManager() = default;
+    SystemManager(const SystemManager&) = delete;
+    SystemManager(SystemManager&&) = delete;
+    SystemManager& operator=(const SystemManager&) = delete;
+    SystemManager& operator=(SystemManager&&) = delete;
 
-    void init(SystemManager&, World&);
-    void update(World&);
+    void init(SystemInitContext&);
+    void update(SystemUpdateContext&);
     void shutdown();
 
     template<typename T>
@@ -33,7 +33,7 @@ private:
 };
 
 template<typename T>
-T& SystemManagerImpl::getSystem()
+T& SystemManager::getSystem()
 {
     const auto iter{ systemIndexById_.find(std::type_index{typeid(T)}) };
 
