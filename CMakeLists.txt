@@ -14,8 +14,6 @@ target_compile_definitions(${PROJECT_NAME} PUBLIC $<$<CONFIG:Editor>:EDITOR=1>)
 target_include_directories(${PROJECT_NAME}
     SYSTEM PUBLIC
         "${CMAKE_CURRENT_SOURCE_DIR}/Public/Engine"
-        $<$<CONFIG:Editor>:${CMAKE_CURRENT_SOURCE_DIR}/Public/Editor>
-    PRIVATE
-        "${CMAKE_CURRENT_SOURCE_DIR}")
+        $<$<CONFIG:Editor>:${CMAKE_CURRENT_SOURCE_DIR}/Public/Editor>)
 
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${src_files})

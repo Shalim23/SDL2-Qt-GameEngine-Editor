@@ -3,5 +3,5 @@
 template<typename... Ts>
 struct TypesList 
 {
-    constexpr std::size_t size{sizeof...(Ts)};
+    static constexpr std::size_t size{sizeof...(Ts)};
 };
