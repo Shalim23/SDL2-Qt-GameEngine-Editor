@@ -33,19 +33,18 @@ public:
 
 private:
     std::vector<std::unique_ptr<SystemBase>> systems_;
-    std::unordered_map<std::type_index, size_t> systemIndexById_;
+    std::unordered_map<std::type_index, SystemBase*> systemsById_;
 };
 
 template<typename T>
 T& SystemManager::getSystem()
 {
-    const auto iter{ systemIndexById_.find(std::type_index{typeid(T)}) };
+    const auto iter{ systemsById_.find(std::type_index{typeid(T)}) };
 
     //#TODO https://github.com/Shalim23/SDL2-Qt-GameEngine-Editor/issues/1
     // fatal error if not found
 
-    auto* system{ systems_[iter->second].get() };
-    return *static_cast<T*>(system);
+    return *static_cast<T*>(systems_[iter->second]);
 }
 
 template<typename SystemsList>
@@ -63,8 +62,8 @@ void SystemManager::registerSystems()
     {
         ([this]
         {
-            systems_.emplace_back(std::make_unique<Ts>());
-            systemIndexById_.emplace(std::type_index{ typeid(Ts) }, systems_.size() - 1);
+            auto& system{systems_.emplace_back(std::make_unique<Ts>())};
+            systemsById_.emplace(std::type_index{ typeid(Ts) }, system.get());
         }(), ...);
     } };
 
