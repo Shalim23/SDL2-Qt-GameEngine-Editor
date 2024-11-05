@@ -2,6 +2,14 @@
 #include <type_traits>
 #include "Engine/ECS/Types/TypesList.h"
 
+template<typename T>
+struct IsTypesList : std::false_type {};
+
+template<typename... Ts>
+struct IsTypesList<TypesList<Ts...>> : std::true_type {};
+
+//-
+
 template<typename T, typename List>
 struct ContainsType;
 
@@ -13,6 +21,8 @@ struct ContainsType<T, TypesList<T, Ts...>> : std::true_type {};
 
 template<typename T, typename U, typename... Ts>
 struct ContainsType<T, TypesList<U, Ts...>> : ContainsType<T, TypesList<Ts...>> {};
+
+//-
 
 template<typename List>
 struct FindDuplicate;
@@ -32,6 +42,8 @@ struct FindDuplicate<TypesList<T, Ts...>>
         typename FindDuplicate<TypesList<Ts...>>::type
     >::type;
 };
+
+//-
 
 template <typename...>
 struct DuplicatedType;

@@ -1,11 +1,10 @@
 #pragma once
 
-#include <vector>
 #include <memory>
 #include <unordered_map>
 #include <typeindex>
+#include <bit>
 
-#include "Engine/ECS/Types/SystemBase.h"
 #include "Types/TypesListOperations.h"
 
 class SystemInitContext;
@@ -32,38 +31,52 @@ public:
     void registerSystems();
 
 private:
-    std::vector<std::unique_ptr<SystemBase>> systems_;
-    std::unordered_map<std::type_index, SystemBase*> systemsById_;
+    std::unique_ptr<char[]> systems_;
+    std::unordered_map<std::type_index, size_t> systemOffsetById_;
+    size_t alignment_{0};
+    size_t systemsCount_{0};
 };
 
 template<typename T>
 T& SystemManager::getSystem()
 {
-    const auto iter{ systemsById_.find(std::type_index{typeid(T)}) };
+    const auto iter{ systemOffsetById_.find(std::type_index{typeid(T)}) };
 
-    //#TODO https://github.com/Shalim23/SDL2-Qt-GameEngine-Editor/issues/1
-    // fatal error if not found
+    if (iter == systemOffsetById_.end())
+    {
+        //throw
+    }
 
-    return *static_cast<T*>(systems_[iter->second]);
+    return *reinterpret_cast<T*>(systems_ + iter->second);
 }
 
 template<typename SystemsList>
 void SystemManager::registerSystems()
 {
-    static_assert(SystemsList::size, "No systems to register!");
+    if (systems_)
+    {
+        return;
+    }
+
+    static_assert(std::enable_if_t<IsTypesList<SystemsList>::value, void>,
+        "TypesList is expected!");
+
+    static_assert(SystemsList::size > 0, "No systems to register!");
     checkDuplicates<SystemsList>();
 
-    //#TODO https://github.com/Shalim23/SDL2-Qt-GameEngine-Editor/issues/1
-    // warning if already registered
+    alignment_ = std::bit_ceil(SystemsList::getLargestTypeSize());
+    systemsCount_ = SystemsList::size;
 
-    systems_.reserve(SystemsList::size);
+    systems_ = std::make_unique<char[]>(alignment_ * SystemsList::size);
 
+    size_t nextAlignment{0};
     auto f{ [this] <typename... Ts>(TypesList<Ts...>)
     {
-        ([this]
+        ([this, &nextAlignment]
         {
-            auto& system{systems_.emplace_back(std::make_unique<Ts>())};
-            systemsById_.emplace(std::type_index{ typeid(Ts) }, system.get());
+            new(systems_.get() + nextAlignment) Ts{};
+            systemOffsetById_.emplace(std::type_index{ typeid(Ts) }, nextAlignment);
+            nextAlignment += alignment_;
         }(), ...);
     } };
 

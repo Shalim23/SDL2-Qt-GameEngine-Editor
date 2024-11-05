@@ -19,6 +19,6 @@ public:
     World& operator=(World&&) = delete;
 
 private:
-    std::unordered_map<size_t, std::unique_ptr<ComponentsListBase>> components_;
-    std::unordered_map<Entity, std::unordered_map<size_t, size_t>> entities_;
+    //std::unordered_map<size_t, std::unique_ptr<ComponentsListBase>> components_;
+    //std::unordered_map<Entity, std::unordered_map<size_t, size_t>> entities_;
 };
