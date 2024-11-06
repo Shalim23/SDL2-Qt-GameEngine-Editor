@@ -31,7 +31,7 @@ public:
     T& getSystem();
 
     template<typename SystemsList>
-    void registerSystems() noexcept;
+    void registerSystems();
 
 private:
     std::vector<std::unique_ptr<SystemBase>> systems_;
@@ -48,15 +48,15 @@ T& SystemManagerImpl::getSystem()
         throw std::logic_error{std::format("Cannot find system {}!", typeid(T).name())};
     }
 
-    return *static_cast<T*>(systems_[iter->second]);
+    return *static_cast<T*>(iter->second);
 }
 
 template<typename SystemsList>
-void SystemManagerImpl::registerSystems() noexcept
+void SystemManagerImpl::registerSystems()
 {
     if (systems_.size() != 0)
     {
-        throw std::logic_error{ "Systems are already initialized!"};
+        throw std::logic_error{"Systems are already initialized!"};
     }
 
     static_assert(SystemsList::size > 0, "No systems to register!");
