@@ -1,35 +1,16 @@
-#include "SystemManager.h"
-#include "Engine/ECS/Types/SystemBase.h"
+#include "Engine/ECS/SystemManager.h"
 
-namespace
+void SystemManager::init(World& w)
 {
-#define FOR_EACH_SYSTEM \
-for(size_t i{0}; i < alignment_ * systemsCount_; i += alignment_)
-
-#define SYSTEM_PTR \
-reinterpret_cast<SystemBase*>(systems_.get() + i)
+    impl_.init(*this, w);
 }
 
-void SystemManager::init(SystemInitContext& context)
+void SystemManager::update(World& w)
 {
-    FOR_EACH_SYSTEM
-    {
-        SYSTEM_PTR->init(context);
-    }
-}
-
-void SystemManager::update(SystemUpdateContext& context)
-{
-    FOR_EACH_SYSTEM
-    {
-        SYSTEM_PTR->update(context);
-    }
+    impl_.update(w);
 }
 
 void SystemManager::shutdown()
 {
-    FOR_EACH_SYSTEM
-    {
-        SYSTEM_PTR->shutdown();
-    }
+    impl_.shutdown();
 }

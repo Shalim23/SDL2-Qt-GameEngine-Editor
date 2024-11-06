@@ -1,13 +1,12 @@
 #pragma once
 
-#include "../../Private/ECS/SystemManager.h"
-#include "../../Private/ECS/World.h"
-#include "ECS/SystemContext.h"
+#include "ECS/SystemManager.h"
+#include "ECS/World.h"
 
 class Engine final
 {
 public:
-    Engine();
+    Engine() = default;
     ~Engine() = default;
     Engine(const Engine&) = delete;
     Engine(Engine&&) = delete;
@@ -24,12 +23,13 @@ public:
 private:
     SystemManager sm_;
     World world_;
-    SystemInitContext context_;
 };
 
 template<typename SystemsList>
 void Engine::registerSystems()
 {
+    static_assert(std::enable_if_t<IsTypesList<SystemsList>::value, void>,
+        "TypesList is expected!");
     //#TODO concat with engine systems
     sm_.registerSystems<SystemsList>();
 }

@@ -1,18 +1,13 @@
 #include "Engine/Engine.h"
 
-Engine::Engine()
-    : context_{sm_, world_}
-{
-}
-
 void Engine::init()
 {
-    sm_.init(context_);
+    sm_.init(world_);
 }
 
 void Engine::runFrame()
 {
-    sm_.update(context_);
+    sm_.update(world_);
 }
 
 void Engine::shutdown()
