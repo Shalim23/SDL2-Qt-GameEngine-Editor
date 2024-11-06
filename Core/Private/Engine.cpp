@@ -1,16 +1,22 @@
 #include "Engine/Engine.h"
 
+
 void Engine::init()
 {
-    sm_.init(world_);
+    impl_.init();
 }
 
 void Engine::runFrame()
 {
-    sm_.update(world_);
+    impl_.runFrame();
 }
 
 void Engine::shutdown()
 {
-    sm_.shutdown();
+    impl_.shutdown();
+}
+
+void Engine::run()
+{
+    impl_.run();
 }

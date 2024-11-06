@@ -1,11 +1,5 @@
 #pragma once
 
-#include <memory>
-#include <unordered_map>
-#include <typeindex>
-#include <bit>
-
-#include "Types/SystemBase.h"
 #include "../../Private/ECS/SystemManagerImpl.h"
 
 class World;

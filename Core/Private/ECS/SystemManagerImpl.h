@@ -8,6 +8,7 @@
 #include <format>
 
 #include "Types/TypesListOperations.h"
+#include "Engine/ECS/Types/SystemBase.h"
 
 class SystemManager;
 class World;
@@ -18,7 +19,7 @@ public:
     SystemManagerImpl() = default;
     ~SystemManagerImpl() = default;
     SystemManagerImpl(const SystemManagerImpl&) = delete;
-    SystemManagerImpl(SystemManager&&) = delete;
+    SystemManagerImpl(SystemManagerImpl&&) = delete;
     SystemManagerImpl& operator=(const SystemManagerImpl&) = delete;
     SystemManagerImpl& operator=(SystemManagerImpl&&) = delete;
 
@@ -55,11 +56,10 @@ void SystemManagerImpl::registerSystems() noexcept
 {
     if (systems_.size() != 0)
     {
-        return;
+        throw std::logic_error{ "Systems are already initialized!"};
     }
 
     static_assert(SystemsList::size > 0, "No systems to register!");
-
     checkDuplicates<SystemsList>();
 
     systems_.reserve(SystemsList::size);

@@ -1,84 +1,25 @@
-#pragma once
+#include "SystemManagerImpl.h"
 
-#include <memory>
-#include <unordered_map>
-#include <typeindex>
-#include <bit>
-
-#include "Types/TypesListOperations.h"
-
-class SystemInitContext;
-class SystemUpdateContext;
-
-class SystemManager final
+void SystemManagerImpl::init(SystemManager& sm, World& w)
 {
-public:
-    SystemManager() = default;
-    ~SystemManager() = default;
-    SystemManager(const SystemManager&) = delete;
-    SystemManager(SystemManager&&) = delete;
-    SystemManager& operator=(const SystemManager&) = delete;
-    SystemManager& operator=(SystemManager&&) = delete;
-
-    void init(SystemInitContext&);
-    void update(SystemUpdateContext&);
-    void shutdown();
-
-    template<typename T>
-    T& getSystem();
-
-    template<typename SystemsList>
-    void registerSystems();
-
-private:
-    std::unique_ptr<char[]> systems_;
-    std::unordered_map<std::type_index, size_t> systemOffsetById_;
-    size_t alignment_{0};
-    size_t systemsCount_{0};
-};
-
-template<typename T>
-T& SystemManager::getSystem()
-{
-    const auto iter{ systemOffsetById_.find(std::type_index{typeid(T)}) };
-
-    if (iter == systemOffsetById_.end())
+    for (auto& s : systems_)
     {
-        //throw
+        s->init(sm, w);
     }
-
-    return *reinterpret_cast<T*>(systems_ + iter->second);
 }
 
-template<typename SystemsList>
-void SystemManager::registerSystems()
+void SystemManagerImpl::update(World& w)
 {
-    if (systems_)
+    for (auto& s : systems_)
     {
-        return;
+        s->update(w);
     }
+}
 
-    static_assert(std::enable_if_t<IsTypesList<SystemsList>::value, void>,
-        "TypesList is expected!");
-
-    static_assert(SystemsList::size > 0, "No systems to register!");
-    checkDuplicates<SystemsList>();
-
-    alignment_ = std::bit_ceil(SystemsList::getLargestTypeSize());
-    systemsCount_ = SystemsList::size;
-
-    systems_ = std::make_unique<char[]>(alignment_ * SystemsList::size);
-
-    size_t nextAlignment{0};
-    auto f{ [this] <typename... Ts>(TypesList<Ts...>)
+void SystemManagerImpl::shutdown()
+{
+    for (auto& s : systems_)
     {
-        ([this, &nextAlignment]
-        {
-            new(systems_.get() + nextAlignment) Ts{};
-            systemOffsetById_.emplace(std::type_index{ typeid(Ts) }, nextAlignment);
-            nextAlignment += alignment_;
-        }(), ...);
-    } };
-
-    f(SystemsList{});
+        s->shutdown();
+    }
 }

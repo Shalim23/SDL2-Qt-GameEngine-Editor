@@ -1,7 +1,6 @@
 #pragma once
 
-#include "ECS/SystemManager.h"
-#include "ECS/World.h"
+#include "../Private/EngineImpl.h"
 
 class Engine final
 {
@@ -16,20 +15,26 @@ public:
     void init();
     void runFrame();
     void shutdown();
+    void run();
 
     template<typename SystemsList>
     void registerSystems();
 
+    template<typename ComponentsList>
+    void registerComponents();
+
 private:
-    SystemManager sm_;
-    World world_;
+    EngineImpl impl_;
 };
 
 template<typename SystemsList>
 void Engine::registerSystems()
 {
-    static_assert(std::enable_if_t<IsTypesList<SystemsList>::value, void>,
-        "TypesList is expected!");
-    //#TODO concat with engine systems
-    sm_.registerSystems<SystemsList>();
+    impl_.registerSystems<SystemsList>();
+}
+
+template<typename ComponentsList>
+void Engine::registerComponents()
+{
+    impl_.registerComponents<ComponentsList>();
 }
