@@ -31,7 +31,7 @@ TEST(SystemManagerTests, GetSystem)
     ASSERT_EQ(system.getValue(), 0);
 }
 
-TEST(SystemManagerTests, GetSystemInit)
+TEST(SystemManagerTests, SystemInit)
 {
     using TestSystems = TypesList<SystemA>;
 
@@ -43,7 +43,7 @@ TEST(SystemManagerTests, GetSystemInit)
     ASSERT_EQ(system.getValue(), 42);
 }
 
-TEST(SystemManagerTests, GetSystemUpdate)
+TEST(SystemManagerTests, SystemUpdate)
 {
     using TestSystems = TypesList<SystemA>;
 
@@ -55,7 +55,7 @@ TEST(SystemManagerTests, GetSystemUpdate)
     ASSERT_EQ(system.getValue(), 42 * 2);
 }
 
-TEST(SystemManagerTests, GetSystemShutdown)
+TEST(SystemManagerTests, SystemShutdown)
 {
     using TestSystems = TypesList<SystemA>;
 
