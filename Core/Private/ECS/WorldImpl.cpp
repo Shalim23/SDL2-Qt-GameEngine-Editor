@@ -6,16 +6,16 @@ namespace
     Entity nextEntity{0};
 }
 
-Entity WorldImpl::createEntity()
+Entity WorldImpl::createEntity() noexcept
 {
     if (freeEntities_.size() > 0)
     {
-        auto emplaced{ entities_.emplace(freeEntities_.back(), std::unordered_map<size_t, size_t>{}) };
+        auto emplaced{ entities_.emplace(freeEntities_.back(), std::vector<ComponentID>{}) };
         freeEntities_.pop_back();
         return emplaced.first->first;
     }
 
-    return entities_.emplace(++nextEntity, std::unordered_map<size_t, size_t>{}).first->first;
+    return entities_.emplace(++nextEntity, std::vector<ComponentID>{}).first->first;
 }
 
 void WorldImpl::destroyEntity(const Entity e)
@@ -26,14 +26,24 @@ void WorldImpl::destroyEntity(const Entity e)
         throw std::logic_error{"Trying to destroy non-existent entity!"};
     }
 
-    for (const auto& [componentId, index] : iter->second)
+    for (const auto& componentId : iter->second)
     {
+        auto iter{components_.find(componentId)};
+        if (iter == components_.end())
+        {
+            throw std::logic_error{ "Unknown ComponentID!" };
+        }
+        iter->second->removeComponent(e);
+
         //#TODO
-        //remove component by index (removeComponentByIndex(const size_t index, const Entity e)
-        //inside check if index is correct
+        //per-frame component removal
     }
 
     freeEntities_.push_back(e);
     entities_.erase(e);
 }
 
+size_t WorldImpl::getEntitiesAmount() const noexcept
+{
+    return entities_.size();
+}

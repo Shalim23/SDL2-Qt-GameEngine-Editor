@@ -1,6 +1,6 @@
 #include "SystemManagerImpl.h"
 
-void SystemManagerImpl::init(SystemManager& sm, World& w)
+void SystemManagerImpl::init(SystemManager& sm, World& w) const noexcept
 {
     for (auto& s : systems_)
     {
@@ -8,7 +8,7 @@ void SystemManagerImpl::init(SystemManager& sm, World& w)
     }
 }
 
-void SystemManagerImpl::update(World& w)
+void SystemManagerImpl::update(World& w) const noexcept
 {
     for (auto& s : systems_)
     {
@@ -16,7 +16,7 @@ void SystemManagerImpl::update(World& w)
     }
 }
 
-void SystemManagerImpl::shutdown()
+void SystemManagerImpl::shutdown() const noexcept
 {
     for (auto& s : systems_)
     {

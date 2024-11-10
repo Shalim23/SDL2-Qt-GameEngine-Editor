@@ -23,9 +23,9 @@ public:
     SystemManagerImpl& operator=(const SystemManagerImpl&) = delete;
     SystemManagerImpl& operator=(SystemManagerImpl&&) = delete;
 
-    void init(SystemManager&, World&);
-    void update(World&);
-    void shutdown();
+    void init(SystemManager&, World&) const noexcept;
+    void update(World&) const noexcept;
+    void shutdown() const noexcept;
 
     template<typename T>
     T& getSystem();
