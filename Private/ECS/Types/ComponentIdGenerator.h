@@ -1,10 +1,8 @@
 #pragma once
-#include <cstdint>
+#include "Engine/ECS/Types/ComponentId.h"
 #include <string_view>
 
-using ComponentID = uint64_t;
-
-consteval ComponentID generateComponentID(std::string_view str)
+consteval ComponentId generateComponentId(std::string_view str) noexcept
 {
     std::uint64_t hash{ 14695981039346656037ull };
     for (char c : str)

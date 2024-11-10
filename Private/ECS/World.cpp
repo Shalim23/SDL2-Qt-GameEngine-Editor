@@ -1,16 +1,31 @@
 #include "Engine/ECS/World.h"
 
-Entity World::createEntity() noexcept
+namespace
 {
-    return impl_.createEntity();
+    EntityId nextEntityId{ 0 };
 }
 
-void World::destroyEntity(const Entity e)
+EntityId World::createEntity() noexcept
 {
-    impl_.destroyEntity(e);
+    //#TODO reuse entities
+    return entities_.emplace_back(++nextEntityId).getId();
 }
 
-const std::unordered_map<Entity, std::vector<ComponentID>>& World::getEntities() const noexcept
+void World::destroyEntity(const EntityId entityId) noexcept
 {
-    return impl_.getEntities();
+    const auto iter{std::ranges::find_if(entities_,
+        [entityId](const auto& elem){ return elem.getId() == entityId; })};
+    if (!validateIter(entities_, iter))
+    {
+        return;
+    }
+
+    //#TODO per-frame remove
+    for (const auto componentId : iter->getComponents())
+    {
+        //#TODO remove components
+    }
+
+    std::iter_swap(iter, std::prev(entities_.end()));
+    entities_.pop_back();
 }

@@ -1,11 +1,22 @@
 #pragma once
 
-#include "../../Private/ECS/SystemManagerImpl.h"
+#include <memory>
+#include <typeindex>
+#include <vector>
+
+#include "../../Private/ECS/Types/TypesListOperations.h"
+#include "Types/SystemBase.h"
 
 class World;
 
 class SystemManager final
 {
+    struct System
+    {
+        std::type_index typeIndex;
+        std::unique_ptr<SystemBase> system;
+    };
+
 public:
     SystemManager() = default;
     ~SystemManager() = default;
@@ -14,28 +25,52 @@ public:
     SystemManager& operator=(const SystemManager&) = delete;
     SystemManager& operator=(SystemManager&&) = delete;
 
-    void init(World&);
-    void update(World&);
-    void shutdown();
+    void init(World&) noexcept;
+    void update(World&) const noexcept;
+    void shutdown() const noexcept;
 
     template<typename T>
-    T* getSystem();
+    T* getSystem() noexcept;
 
     template<typename SystemsList>
-    void registerSystems();
+    void registerSystems() noexcept;
 
 private:
-    SystemManagerImpl impl_;
+    std::vector<System> systems_;
 };
 
 template<typename T>
-T* SystemManager::getSystem()
+T* SystemManager::getSystem() noexcept
 {
-    return impl_.getSystem<T>();
+    auto iter{ std::ranges::find_if(systems_,
+        [typeIndex = std::type_index{typeid(T)}](const System& s) { return s.typeIndex == typeIndex; }) };
+
+    return iter != systems_.end() ? static_cast<T*>(iter->system.get()) : nullptr;
 }
 
 template<typename SystemsList>
-void SystemManager::registerSystems()
+void SystemManager::registerSystems() noexcept
 {
-    impl_.registerSystems<SystemsList>();
+    if (systems_.size() != 0)
+    {
+        return;
+    }
+
+    static_assert(SystemsList::size > 0, "No systems to register!");
+    checkDuplicates<SystemsList>();
+
+    systems_.reserve(SystemsList::size);
+
+    auto f{ [this] <typename... Ts>(TypesList<Ts...>)
+    {
+        ([this]
+        {
+            auto& system{systems_.emplace_back(
+                System{.typeIndex = std::type_index{ typeid(Ts)},
+                       .system = std::make_unique<Ts>()}
+                )};
+        }(), ...);
+    } };
+
+    f(SystemsList{});
 }

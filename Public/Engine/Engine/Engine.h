@@ -1,12 +1,14 @@
 #pragma once
 
-#include "../Private/EngineImpl.h"
+#include "Engine/ECS/SystemManager.h"
+#include "Engine/ECS/World.h"
+#include "../Private/Types/EngineState.h"
 
 class Engine final
 {
 public:
     Engine() = default;
-    ~Engine() = default;
+    ~Engine();
     Engine(const Engine&) = delete;
     Engine(Engine&&) = delete;
     Engine& operator=(const Engine&) = delete;
@@ -24,17 +26,34 @@ public:
     void registerComponents();
 
 private:
-    EngineImpl impl_;
+    void stop();
+
+private:
+    SystemManager sm_;
+    World world_;
+    EngineState state_{ EngineState::None };
 };
 
 template<typename SystemsList>
 void Engine::registerSystems()
 {
-    impl_.registerSystems<SystemsList>();
+    static_assert(std::enable_if_t<IsTypesList<SystemsList>::value, void>,
+        "TypesList is expected!");
+    //#TODO concat with engine systems
+    sm_.registerSystems<SystemsList>();
+
+    state_ = (state_ == EngineState::ComponentsRegistered)
+        ? EngineState::AllRegistered : EngineState::SystemsRegistered;
 }
 
 template<typename ComponentsList>
 void Engine::registerComponents()
 {
-    impl_.registerComponents<ComponentsList>();
+    static_assert(std::enable_if_t<IsTypesList<ComponentsList>::value, void>,
+        "TypesList is expected!");
+    //#TODO concat with engine components
+    //world_.registerComponents<ComponentsList>();
+
+    state_ = (state_ == EngineState::SystemsRegistered)
+        ? EngineState::AllRegistered : EngineState::ComponentsRegistered;
 }

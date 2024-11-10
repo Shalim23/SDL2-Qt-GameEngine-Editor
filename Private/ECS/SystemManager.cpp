@@ -1,16 +1,25 @@
 #include "Engine/ECS/SystemManager.h"
 
-void SystemManager::init(World& w)
+void SystemManager::init(World& w) noexcept
 {
-    impl_.init(*this, w);
+    for (auto& s : systems_)
+    {
+        s.system->init(*this, w);
+    }
 }
 
-void SystemManager::update(World& w)
+void SystemManager::update(World& w) const noexcept
 {
-    impl_.update(w);
+    for (auto& s : systems_)
+    {
+        s.system->update(w);
+    }
 }
 
-void SystemManager::shutdown()
+void SystemManager::shutdown() const noexcept
 {
-    impl_.shutdown();
+    for (auto& s : systems_)
+    {
+        s.system->shutdown();
+    }
 }

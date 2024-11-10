@@ -49,7 +49,7 @@ template <typename...>
 struct DuplicatedType;
 
 template<typename... Ts>
-consteval void checkDuplicates()
+consteval void checkDuplicates() noexcept
 {
     constexpr bool isDuplicate{ !std::is_void_v<typename FindDuplicate<Ts...>::type> };
     static_assert(!isDuplicate, "Type is already in the registry!");
