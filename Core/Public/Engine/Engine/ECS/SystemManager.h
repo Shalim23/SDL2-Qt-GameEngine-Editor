@@ -19,7 +19,7 @@ public:
     void shutdown();
 
     template<typename T>
-    T& getSystem();
+    T* getSystem();
 
     template<typename SystemsList>
     void registerSystems();
@@ -29,7 +29,7 @@ private:
 };
 
 template<typename T>
-T& SystemManager::getSystem()
+T* SystemManager::getSystem()
 {
     return impl_.getSystem<T>();
 }

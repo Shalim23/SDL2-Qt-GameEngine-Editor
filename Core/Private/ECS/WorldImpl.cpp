@@ -28,12 +28,7 @@ void WorldImpl::destroyEntity(const Entity e)
 
     for (const auto& componentId : iter->second)
     {
-        auto iter{components_.find(componentId)};
-        if (iter == components_.end())
-        {
-            throw std::logic_error{ "Unknown ComponentID!" };
-        }
-        iter->second->removeComponent(e);
+        removeComponent(componentId, e);
 
         //#TODO
         //per-frame component removal
@@ -43,7 +38,17 @@ void WorldImpl::destroyEntity(const Entity e)
     entities_.erase(e);
 }
 
-size_t WorldImpl::getEntitiesAmount() const noexcept
+const std::unordered_map<Entity, std::vector<ComponentID>>& WorldImpl::getEntities() const noexcept
 {
-    return entities_.size();
+    return entities_;
+}
+
+void WorldImpl::removeComponent(const ComponentID id, const Entity e)
+{
+    auto iter{ components_.find(id) };
+    if (iter == components_.end())
+    {
+        throw std::logic_error{ "Unknown ComponentID!" };
+    }
+    iter->second->removeComponent(e);
 }

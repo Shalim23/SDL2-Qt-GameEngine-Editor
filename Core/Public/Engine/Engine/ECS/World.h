@@ -15,7 +15,7 @@ public:
 
     Entity createEntity() noexcept;
     void destroyEntity(const Entity e);
-    size_t getEntitiesAmount() const noexcept;
+    const std::unordered_map<Entity, std::vector<ComponentID>>& getEntities() const noexcept;
 
     template<typename ComponentsList>
     void registerComponents();

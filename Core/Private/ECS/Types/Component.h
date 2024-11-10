@@ -1,17 +1,26 @@
 #pragma once
-#include "Engine/ECS/Types/Entity.h"
+#include "ComponentID.h"
+#include <memory>
 
 template<typename T>
-class Component
+struct Component
 {
-public:
-    Component(const Entity e) : e_{e}, c_{}
-    {}
+    Entity entity;
+    T instance;
+};
 
-    Entity getEntity() const { return e_; }
-    T& get() { return c_; }
+struct ComponentsListBase
+{
+};
 
-private:
-    Entity e_;
-    T c_;
+template<typename T>
+class ComponentsList : ComponentsListBase
+{
+    std::vector<Component<T>> components_;
+};
+
+struct Components
+{
+    ComponentID id;
+    std::unique_ptr<ComponentsListBase> components;
 };

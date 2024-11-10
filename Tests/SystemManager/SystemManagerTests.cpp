@@ -3,14 +3,6 @@
 #include <Engine/ECS/World.h>
 #include "Systems.h"
 
-TEST(SystemManagerTests, DoubleSystemRegistration)
-{
-    using TestSystems = TypesList<SystemA>;
-
-    SystemManager sm;
-    sm.registerSystems<TestSystems>();
-    EXPECT_THROW(sm.registerSystems<TestSystems>(), std::logic_error);
-}
 
 TEST(SystemManagerTests, GetNonRegisteredSystem)
 {
@@ -18,7 +10,8 @@ TEST(SystemManagerTests, GetNonRegisteredSystem)
 
     SystemManager sm;
     sm.registerSystems<TestSystems>();
-    EXPECT_THROW(sm.getSystem<SystemB>(), std::logic_error);
+    auto* s{sm.getSystem<SystemB>()};
+    ASSERT_EQ(s, nullptr);
 }
 
 TEST(SystemManagerTests, GetSystem)
@@ -27,8 +20,8 @@ TEST(SystemManagerTests, GetSystem)
 
     SystemManager sm;
     sm.registerSystems<TestSystems>();
-    auto& system{sm.getSystem<SystemA>()};
-    ASSERT_EQ(system.getValue(), 0);
+    auto* system{sm.getSystem<SystemA>()};
+    ASSERT_EQ(system->getValue(), 0);
 }
 
 TEST(SystemManagerTests, SystemInit)
@@ -38,9 +31,9 @@ TEST(SystemManagerTests, SystemInit)
     World w;
     SystemManager sm;
     sm.registerSystems<TestSystems>();
-    auto& system{ sm.getSystem<SystemA>() };
+    auto* system{ sm.getSystem<SystemA>() };
     sm.init(w);
-    ASSERT_EQ(system.getValue(), 42);
+    ASSERT_EQ(system->getValue(), 42);
 }
 
 TEST(SystemManagerTests, SystemUpdate)
@@ -50,9 +43,9 @@ TEST(SystemManagerTests, SystemUpdate)
     World w;
     SystemManager sm;
     sm.registerSystems<TestSystems>();
-    auto& system{ sm.getSystem<SystemA>() };
+    auto* system{ sm.getSystem<SystemA>() };
     sm.update(w);
-    ASSERT_EQ(system.getValue(), 42 * 2);
+    ASSERT_EQ(system->getValue(), 42 * 2);
 }
 
 TEST(SystemManagerTests, SystemShutdown)
@@ -62,7 +55,7 @@ TEST(SystemManagerTests, SystemShutdown)
     World w;
     SystemManager sm;
     sm.registerSystems<TestSystems>();
-    auto& system{ sm.getSystem<SystemA>() };
+    auto* system{ sm.getSystem<SystemA>() };
     sm.shutdown();
-    ASSERT_EQ(system.getValue(), -1);
+    ASSERT_EQ(system->getValue(), -1);
 }

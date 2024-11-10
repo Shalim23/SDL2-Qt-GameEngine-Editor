@@ -14,17 +14,17 @@ TEST(WorldTests, DoubleComponentsRegistration)
 TEST(WorldTests, CreateEntity)
 {
     World w;
-    ASSERT_EQ(w.getEntitiesAmount(), 0);
+    ASSERT_EQ(w.getEntities().size(), 0);
     w.createEntity();
-    ASSERT_EQ(w.getEntitiesAmount(), 1);
+    ASSERT_EQ(w.getEntities().size(), 1);
 }
 
 TEST(WorldTests, DestroyEntity)
 {
     World w;
-    ASSERT_EQ(w.getEntitiesAmount(), 0);
+    ASSERT_EQ(w.getEntities().size(), 0);
     auto e{w.createEntity()};
-    ASSERT_EQ(w.getEntitiesAmount(), 1);
+    ASSERT_EQ(w.getEntities().size(), 1);
     w.destroyEntity(e);
-    ASSERT_EQ(w.getEntitiesAmount(), 0);
+    ASSERT_EQ(w.getEntities().size(), 0);
 }

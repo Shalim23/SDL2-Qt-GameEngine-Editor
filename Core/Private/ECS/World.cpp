@@ -10,7 +10,7 @@ void World::destroyEntity(const Entity e)
     impl_.destroyEntity(e);
 }
 
-size_t World::getEntitiesAmount() const noexcept
+const std::unordered_map<Entity, std::vector<ComponentID>>& World::getEntities() const noexcept
 {
-    return impl_.getEntitiesAmount();
+    return impl_.getEntities();
 }
