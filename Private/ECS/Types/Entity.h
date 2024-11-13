@@ -51,6 +51,16 @@ public:
         components_.pop_back();
     }
 
+    bool hasComponent(const ComponentId id) const noexcept
+    {
+        return std::ranges::find(components_, id) != components_.end();
+    }
+
+    void addComponent(const ComponentId id) noexcept
+    {
+        components_.push_back(id);
+    }
+
 private:
 
     EntityId id_;
