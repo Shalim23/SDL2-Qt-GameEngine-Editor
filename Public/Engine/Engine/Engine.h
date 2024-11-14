@@ -2,7 +2,7 @@
 
 #include "Engine/ECS/SystemManager.h"
 #include "Engine/ECS/World.h"
-#include "../Private/Types/EngineState.h"
+#include "../../Private/Types/EngineState.h"
 
 class Engine final
 {
@@ -14,16 +14,12 @@ public:
     Engine& operator=(const Engine&) = delete;
     Engine& operator=(Engine&&) = delete;
 
+    template<typename SystemsList, typename ComponentsList>
     void init();
+
     void runFrame();
     void shutdown();
     void run();
-
-    template<typename SystemsList>
-    void registerSystems();
-
-    template<typename ComponentsList>
-    void registerComponents();
 
 private:
     void stop();
@@ -34,26 +30,24 @@ private:
     EngineState state_{ EngineState::None };
 };
 
-template<typename SystemsList>
-void Engine::registerSystems()
+template<typename SystemsList, typename ComponentsList>
+void Engine::init()
 {
-    static_assert(std::enable_if_t<IsTypesList<SystemsList>::value, void>,
-        "TypesList is expected!");
-    //#TODO concat with engine systems
-    sm_.registerSystems<SystemsList>();
+    assert(state_ == EngineState::None);
 
-    state_ = (state_ == EngineState::ComponentsRegistered)
-        ? EngineState::AllRegistered : EngineState::SystemsRegistered;
-}
+    {
+        static_assert(IsTypesList<SystemsList>::value, "TypesList is expected!");
+        //#TODO concat with engine systems
+        sm_.registerSystems<SystemsList>();
+    }
 
-template<typename ComponentsList>
-void Engine::registerComponents()
-{
-    static_assert(std::enable_if_t<IsTypesList<ComponentsList>::value, void>,
-        "TypesList is expected!");
-    //#TODO concat with engine components
-    //world_.registerComponents<ComponentsList>();
+    {
+        static_assert(IsTypesList<ComponentsList>::value, "TypesList is expected!");
+        //#TODO concat with engine components
+        world_.registerComponents<ComponentsList>();
+    }
 
-    state_ = (state_ == EngineState::SystemsRegistered)
-        ? EngineState::AllRegistered : EngineState::ComponentsRegistered;
+    sm_.init(world_);
+
+    state_ = EngineState::Initialized;
 }
