@@ -17,7 +17,7 @@ class Component
 public:
     explicit Component(const EntityId entityId) noexcept
         : entityId_{entityId}
-        , T{}
+        , instance_{}
     {}
 
     EntityId getOwner() const noexcept
@@ -65,6 +65,11 @@ public:
     }
 
     std::vector<Component<T>>& getComponents() noexcept
+    {
+        return components_;
+    }
+
+    const std::vector<Component<T>>& getComponents() const noexcept
     {
         return components_;
     }

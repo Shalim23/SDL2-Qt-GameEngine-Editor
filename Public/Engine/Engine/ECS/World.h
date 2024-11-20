@@ -48,9 +48,15 @@ private:
     T* getComponent(const EntityId entityId, const ComponentId componentId) noexcept;
 
     template<typename T>
-    std::vector<Component<T>>& getComponents(ComponentsBase* components) const noexcept
+    Components<T>& getComponents(ComponentsBase* components) noexcept
     {
-        return static_cast<Components<T>*>(components)->getComponents();
+        return *static_cast<Components<T>*>(components);
+    }
+
+    template<typename T>
+    const Components<T>& getComponents(ComponentsBase* components) const noexcept
+    {
+        return *static_cast<const Components<T>*>(components);
     }
 
 private:
@@ -119,15 +125,15 @@ T* World::getComponent(const EntityId entityId, const ComponentId componentId) n
         return nullptr;
     }
 
-    auto& components{ getComponents<T>(componentsPoolIter->components.get()) };
-    const auto componentIter{ std::ranges::find_if(components,
-        [entityId](const auto& elem) { return elem.entityId == entityId; }) };
+    auto& components{ getComponents<T>(componentsPoolIter->components.get()).getComponents()};
+    auto componentIter{ std::ranges::find_if(components,
+        [entityId](const auto& elem) { return elem.getOwner() == entityId; })};
     if (!validateIter(components, componentIter))
     {
         return nullptr;
     }
 
-    return &componentIter->instance;
+    return &componentIter->getInstance();
 }
 
 template<ComponentType T>
@@ -166,7 +172,7 @@ std::span<EntityId> World::getEntitiesWithComponent() const noexcept
         return {};
     }
 
-    const auto& components{ getComponents<T>(componentsPoolIter->components.get()) };
+    const auto& components{getComponents<T>(componentsPoolIter->components.get()).getComponents()};
 
     thread_local std::vector<EntityId> entities;
     entities.clear();

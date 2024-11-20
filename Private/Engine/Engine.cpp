@@ -12,7 +12,7 @@ void Engine::runFrame()
 
     sm_.update(world_);
 
-    //render separately here
+    renderSystem_->render();
 
     if (world_.getEntitiesWithComponent<StopEngineComponent>().size() > 0)
     {
@@ -25,6 +25,7 @@ void Engine::shutdown()
     if (state_ == EngineState::Stopped)
     {
         sm_.shutdown();
+        shutdownSDL();
     }
 
     state_ = EngineState::None;
@@ -58,4 +59,17 @@ void Engine::run()
 void Engine::stop()
 {
     state_ = EngineState::Stopped;
+}
+
+void Engine::initSDL() const
+{
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+    {
+        throw std::runtime_error{"Failed to init SDL!"};
+    }
+}
+
+void Engine::shutdownSDL() const
+{
+    SDL_Quit();
 }

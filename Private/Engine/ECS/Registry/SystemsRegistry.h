@@ -1,4 +1,7 @@
 #pragma once
 #include <Engine/ECS/Types/TypesList.h>
 
-using EngineSystems = TypesList<>;
+#include "Engine/ECS/Systems/SDLEventsSystem.h"
+#include "../Systems/RenderSystem.h"
+
+using EngineSystems = TypesList<SDLEventsSystem, RenderSystem>;

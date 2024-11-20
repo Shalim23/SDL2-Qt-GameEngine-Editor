@@ -1,5 +1,13 @@
 #pragma once
 
+#define SDL_MAIN_HANDLED
+
+#ifdef NDEBUG
+#define MAIN() int WinMain(int argc, char* argv[])
+#else
+#define MAIN() int main(int argc, char* argv[])
+#endif // NDEBUG
+
 #include "Engine/ECS/SystemManager.h"
 #include "Engine/ECS/World.h"
 #include "../../Private/Engine/Types/EngineState.h"
@@ -26,11 +34,15 @@ public:
 
 private:
     void stop();
+    void initSDL() const;
+    void shutdownSDL() const;
 
 private:
     SystemManager sm_;
     World world_;
     EngineState state_{ EngineState::None };
+
+    RenderSystem* renderSystem_{nullptr};
 
     float dt_{};
 };
@@ -51,6 +63,12 @@ void Engine::init()
         using AllComponents = Concatenate<ComponentsList, EngineComponents>::type;
         world_.registerComponents<AllComponents>();
     }
+
+    initSDL();
+
+    renderSystem_ = sm_.getSystem<RenderSystem>();
+    assert(renderSystem_);
+    renderSystem_->createWindow();
 
     sm_.init(world_);
 
