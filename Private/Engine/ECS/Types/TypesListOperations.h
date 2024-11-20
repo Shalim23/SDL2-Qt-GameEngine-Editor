@@ -59,3 +59,14 @@ consteval void checkDuplicates() noexcept
         DuplicatedType<typename FindDuplicate<Ts...>::type>{};
     }
 }
+
+//-
+
+template<typename List1, typename List2>
+struct Concatenate;
+
+template<typename... Ts1, typename... Ts2>
+struct Concatenate<TypesList<Ts1...>, TypesList<Ts2...>>
+{
+    using type = TypesList<Ts1..., Ts2...>;
+};

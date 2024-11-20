@@ -1,5 +1,5 @@
 #include "Engine/Engine.h"
-
+#include "SDL.h"
 
 Engine::~Engine()
 {
@@ -14,9 +14,10 @@ void Engine::runFrame()
 
     //render separately here
 
-    //#TODO
-    //smth like EngineComponent where stop can be requested
-    //here check this component
+    if (world_.getEntitiesWithComponent<StopEngineComponent>().size() > 0)
+    {
+        stop();
+    }
 }
 
 void Engine::shutdown()
@@ -33,10 +34,22 @@ void Engine::run()
 {
     assert(state_ == EngineState::Initialized);
 
+    constexpr float targetFrameTime{1.0f / 60.0f};
+
     while (state_ != EngineState::Stopped)
     {
-        //loop with 60 FPS
+        const auto frameTimeStart{ SDL_GetPerformanceCounter() };
+
         runFrame();
+
+        const auto frameTimeEnd{ SDL_GetPerformanceCounter() };
+        dt_ = (frameTimeEnd - frameTimeStart)
+            / static_cast<float>(SDL_GetPerformanceFrequency());
+
+        if (dt_ < targetFrameTime)
+        {
+            SDL_Delay(static_cast<Uint32>((targetFrameTime - dt_) * 1000.0f));
+        }
     }
 
     shutdown();

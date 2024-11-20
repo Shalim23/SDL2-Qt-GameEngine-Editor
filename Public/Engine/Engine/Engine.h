@@ -2,7 +2,10 @@
 
 #include "Engine/ECS/SystemManager.h"
 #include "Engine/ECS/World.h"
-#include "../../Private/Types/EngineState.h"
+#include "../../Private/Engine/Types/EngineState.h"
+#include "../../Private/Engine/ECS/Types/TypesListOperations.h"
+#include "../../Private/Engine/ECS/Registry/ComponentsRegistry.h"
+#include "../../Private/Engine/ECS/Registry/SystemsRegistry.h"
 
 class Engine final
 {
@@ -28,6 +31,8 @@ private:
     SystemManager sm_;
     World world_;
     EngineState state_{ EngineState::None };
+
+    float dt_{};
 };
 
 template<typename SystemsList, typename ComponentsList>
@@ -37,14 +42,14 @@ void Engine::init()
 
     {
         static_assert(IsTypesList<SystemsList>::value, "TypesList is expected!");
-        //#TODO concat with engine systems
-        sm_.registerSystems<SystemsList>();
+        using AllSystems = Concatenate<SystemsList, EngineSystems>::type;
+        sm_.registerSystems<AllSystems>();
     }
 
     {
         static_assert(IsTypesList<ComponentsList>::value, "TypesList is expected!");
-        //#TODO concat with engine components
-        world_.registerComponents<ComponentsList>();
+        using AllComponents = Concatenate<ComponentsList, EngineComponents>::type;
+        world_.registerComponents<AllComponents>();
     }
 
     sm_.init(world_);

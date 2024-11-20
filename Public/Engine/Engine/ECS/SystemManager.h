@@ -4,7 +4,7 @@
 #include <typeindex>
 #include <vector>
 
-#include "../../Private/ECS/Types/TypesListOperations.h"
+#include "../../Private/Engine/ECS/Types/TypesListOperations.h"
 #include "Types/SystemBase.h"
 
 class World;

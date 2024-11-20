@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <span>
 #include <memory>
 #include <algorithm>
 #include <stdexcept>
@@ -8,9 +9,9 @@
 
 #include "Engine/ECS/Types/ComponentID.h"
 
-#include "../../Private/ECS/Types/Entity.h"
-#include "../../Private/ECS/Types/TypesListOperations.h"
-#include "../../Private/ECS/Types/Component.h"
+#include "../../Private/Engine/ECS/Types/Entity.h"
+#include "../../Private/Engine/ECS/Types/TypesListOperations.h"
+#include "../../Private/Engine/ECS/Types/Component.h"
 #include "../../Private/Utils.h"
 
 class World final
@@ -36,6 +37,9 @@ public:
     template<ComponentType T>
     void removeComponent(const EntityId entityId) noexcept;
 
+    template<ComponentType T>
+    std::span<EntityId> getEntitiesWithComponent() const noexcept;
+
     template<typename ComponentsList>
     void registerComponents() noexcept;
 
@@ -44,9 +48,9 @@ private:
     T* getComponent(const EntityId entityId, const ComponentId componentId) noexcept;
 
     template<typename T>
-    std::vector<Component<T>>& getComponents(ComponentsBase* components) noexcept
+    std::vector<Component<T>>& getComponents(ComponentsBase* components) const noexcept
     {
-        return *static_cast<Components<T>*>(components)->components;
+        return static_cast<Components<T>*>(components)->getComponents();
     }
 
 private:
@@ -79,7 +83,7 @@ T& World::addComponent(const EntityId entityId)
         throw std::logic_error{ std::format("Component {} doesn't exist!", componentId) };
     }
 
-    auto& components{ getComponents(componentsPoolIter->components.get()) };
+    auto& components{ getComponents<T>(componentsPoolIter->components.get()) };
     auto& newComponent{components.addComponent(entityId)};
 
     entityIter->addComponent(componentId);
@@ -115,7 +119,7 @@ T* World::getComponent(const EntityId entityId, const ComponentId componentId) n
         return nullptr;
     }
 
-    auto& components{ getComponents(componentsPoolIter->components.get()) };
+    auto& components{ getComponents<T>(componentsPoolIter->components.get()) };
     const auto componentIter{ std::ranges::find_if(components,
         [entityId](const auto& elem) { return elem.entityId == entityId; }) };
     if (!validateIter(components, componentIter))
@@ -149,6 +153,31 @@ void World::removeComponent(const EntityId entityId) noexcept
     componentsIter->components->removeComponent(entityId);
 }
 
+template<ComponentType T>
+std::span<EntityId> World::getEntitiesWithComponent() const noexcept
+{
+    constexpr auto componentId{ T::getComponentId() };
+
+    const auto componentsPoolIter{ std::ranges::find_if(components_,
+            [componentId](const auto& elem) { return elem.id == componentId; }) };
+    if (!validateIter(components_, componentsPoolIter))
+    {
+        assert(!"Cannot find component!");
+        return {};
+    }
+
+    const auto& components{ getComponents<T>(componentsPoolIter->components.get()) };
+
+    thread_local std::vector<EntityId> entities;
+    entities.clear();
+    entities.reserve(components.size());
+
+    std::transform(components.begin(), components.end(), std::back_inserter(entities),
+        [](const auto& component) { return component.getOwner(); });
+
+    return std::span<EntityId>{entities};
+}
+
 template<typename ComponentsList>
 void World::registerComponents() noexcept
 {
@@ -166,12 +195,9 @@ void World::registerComponents() noexcept
     {
         ([this]
         {
-            static_assert(std::is_invocable_v<decltype(&Ts::getComponentId)>,
-                          "Component must have COMPONENT_ID_GETTER");
+            static_assert(ComponentType<Ts>, "Component must have COMPONENT_ID_GETTER");
 
-            components_.emplace(
-                ComponentsPool{.id = Ts::getComponentId(),
-                .components = std::make_unique<Components<Ts>>()});
+            components_.emplace_back(Ts::getComponentId(), std::make_unique<Components<Ts>>());
         }(), ...);
     } };
 
