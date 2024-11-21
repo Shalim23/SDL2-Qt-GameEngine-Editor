@@ -33,7 +33,7 @@ void Engine::shutdown()
 
 void Engine::run()
 {
-    assert(state_ == EngineState::Initialized);
+    SDL_assert(state_ == EngineState::Initialized);
 
     constexpr float targetFrameTime{1.0f / 60.0f};
 
@@ -65,6 +65,7 @@ void Engine::initSDL() const
 {
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
     {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, SDL_FUNCTION, "Failed to init SDL!", nullptr);
         throw std::runtime_error{"Failed to init SDL!"};
     }
 }

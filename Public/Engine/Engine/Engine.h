@@ -50,7 +50,7 @@ private:
 template<typename SystemsList, typename ComponentsList>
 void Engine::init()
 {
-    assert(state_ == EngineState::None);
+    SDL_assert(state_ == EngineState::None);
 
     {
         static_assert(IsTypesList<SystemsList>::value, "TypesList is expected!");
@@ -67,8 +67,11 @@ void Engine::init()
     initSDL();
 
     renderSystem_ = sm_.getSystem<RenderSystem>();
-    assert(renderSystem_);
+    SDL_assert(renderSystem_);
+
+#ifndef EDITOR
     renderSystem_->createWindow();
+#endif
 
     sm_.init(world_);
 

@@ -4,6 +4,7 @@
 #include <typeindex>
 #include <vector>
 
+#include "SDL.h"
 #include "../../Private/Engine/ECS/Types/TypesListOperations.h"
 #include "Types/SystemBase.h"
 
@@ -45,6 +46,7 @@ T* SystemManager::getSystem() noexcept
     auto iter{ std::ranges::find_if(systems_,
         [typeIndex = std::type_index{typeid(T)}](const System& s) { return s.typeIndex == typeIndex; }) };
 
+    SDL_assert(iter != systems_.end());
     return iter != systems_.end() ? static_cast<T*>(iter->system.get()) : nullptr;
 }
 

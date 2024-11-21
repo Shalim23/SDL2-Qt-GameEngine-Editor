@@ -72,13 +72,15 @@ T& World::addComponent(const EntityId entityId)
                 [entityId](const auto& elem) { return elem.getId() == entityId; }) };
     if (!validateIter(entities_, entityIter))
     {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, SDL_FUNCTION,
+            std::format("Entity {} doesn't exist!", entityId).c_str(), nullptr);
         throw std::logic_error{std::format("Entity {} doesn't exist!", entityId)};
     }
 
     constexpr auto componentId{ T::getComponentId() };
     if (entityIter->hasComponent(componentId))
     {
-        assert(!"Trying to add existing component!");
+        SDL_assert(!"Trying to add existing component!");
         return *getComponent<T>(entityId, componentId);
     }
 
@@ -86,6 +88,8 @@ T& World::addComponent(const EntityId entityId)
             [componentId](const auto& elem) { return elem.id == componentId; }) };
     if (!validateIter(components_, componentsPoolIter))
     {
+        SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_ERROR, SDL_FUNCTION,
+            std::format("Component {} doesn't exist!", componentId).c_str(), nullptr);
         throw std::logic_error{ std::format("Component {} doesn't exist!", componentId) };
     }
 
@@ -168,7 +172,6 @@ std::span<EntityId> World::getEntitiesWithComponent() const noexcept
             [componentId](const auto& elem) { return elem.id == componentId; }) };
     if (!validateIter(components_, componentsPoolIter))
     {
-        assert(!"Cannot find component!");
         return {};
     }
 
