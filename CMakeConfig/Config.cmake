@@ -6,6 +6,10 @@ if(NOT isConfigDone)
 
     set(isConfigDone TRUE)
 
+    if (MSVC)
+        add_compile_options(/Zc:__cplusplus)
+    endif()
+
     get_property(isMultiConfig GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
 
     if(isMultiConfig)
